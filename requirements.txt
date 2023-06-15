@@ -1,0 +1,6 @@
+gradio
+nltk
+num2words
+omegaconf
+torch
+torchaudio
