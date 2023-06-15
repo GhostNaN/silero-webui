@@ -17,6 +17,7 @@ pip install -r requirements.txt
 # Run app
 python app.py
 ```
+You can also run with the included ![shell script](run.sh)
 
 ## Acknowledgments
 - Silero Models: https://github.com/snakers4/silero-models
