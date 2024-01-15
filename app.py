@@ -95,7 +95,8 @@ def ui(launch_kwargs):
         with gr.Row():
             text_input = gr.Textbox(max_lines=1000, lines=5, placeholder='Enter text here', label='Input')
 
-        voice = gr.Dropdown(value=params['speaker'], choices=voices_by_gender, label='TTS voice')
+        voice = gr.Dropdown(value=params['speaker'], choices=voices_by_gender, label='TTS voice', allow_custom_value=True)
+
         with gr.Row():
             v_pitch = gr.Dropdown(value=params['voice_pitch'], choices=voice_pitches, label='Voice pitch')
             v_speed = gr.Dropdown(value=params['voice_speed'], choices=voice_speeds, label='Voice speed')
