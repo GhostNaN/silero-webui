@@ -76,7 +76,7 @@ def generate(text_input, progress=gr.Progress()):
 
     output_file = 'output.wav'
 
-    torchaudio.save(output_file, audio, params['sample_rate'])
+    torchaudio.save(output_file, audio, params['sample_rate'], format="wav")
 
     progress(1, 'Creating waveform')
     out = gr.make_waveform(output_file)
