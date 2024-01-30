@@ -16,6 +16,7 @@ params = {
     'model_id': 'v3_en',
     'sample_rate': 48000,
     'device': 'cpu',
+    'raw_mode': False,
     'voice_pitch': 'medium',
     'voice_speed': 'medium',
     'volume': '50'
@@ -45,16 +46,22 @@ def generate(text_input, progress=gr.Progress()):
     if not model:
         load_model()
 
-    text_input = tts_preprocessor.preprocess(text_input)
+    silero_input = text_input
+    if not params['raw_mode']:
+        text_input = tts_preprocessor.preprocess(text_input)
 
-    prosody = '<prosody rate="{}" pitch="{}">'.format(params['voice_speed'], params['voice_pitch'])
-    silero_input = f'<speak>{prosody}{text_input}</prosody></speak>'
+        prosody = '<prosody rate="{}" pitch="{}">'.format(params['voice_speed'], params['voice_pitch'])
+        silero_input = f'<speak>{prosody}{text_input}</prosody></speak>'
 
     progress(0, 'Generating Speech')
 
-    audio = model.apply_tts(ssml_text=silero_input,
-                                speaker=params['speaker'],
-                                sample_rate=params['sample_rate'])
+    try:
+        audio = model.apply_tts(ssml_text=silero_input,
+                                    speaker=params['speaker'],
+                                    sample_rate=params['sample_rate'])
+    except Exception as e:
+        raise gr.Error("model.apply_tts() failed: " + str(e))
+
 
     # Adjust volume
     audio = torch.multiply(audio, float(params['volume'])/100)
@@ -86,7 +93,10 @@ def ui(launch_kwargs):
         with gr.Row():
             text_input = gr.Textbox(max_lines=1000, lines=5, placeholder='Enter text here', label='Input')
 
-        voice = gr.Dropdown(value=params['speaker'], choices=voices_by_gender, label='TTS voice', allow_custom_value=True)
+        with gr.Row():
+            voice = gr.Dropdown(value=params['speaker'], choices=voices_by_gender, label='TTS voice', allow_custom_value=True)
+            raw_mode = gr.Checkbox(value=params['raw_mode'], label='Raw Mode',
+                                   info='Input text will not be processed so it can be used for SSML XML formatted text')
 
         with gr.Row():
             v_pitch = gr.Dropdown(value=params['voice_pitch'], choices=voice_pitches, label='Voice pitch')
@@ -103,6 +113,7 @@ def ui(launch_kwargs):
 
         # Event functions to update the parameters in the backend
         voice.change(lambda x: params.update({"speaker": x}), voice, None)
+        raw_mode.change(lambda x: params.update({"raw_mode": x}), raw_mode, None)
         v_pitch.change(lambda x: params.update({"voice_pitch": x}), v_pitch, None)
         v_speed.change(lambda x: params.update({"voice_speed": x}), v_speed, None)
         volume.change(lambda x: params.update({"volume": x}), volume, None)

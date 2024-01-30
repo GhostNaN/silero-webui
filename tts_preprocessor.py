@@ -37,7 +37,7 @@ def preprocess(string):
     # the order for some of these matter
     # For example, you need to remove the commas in numbers before expanding them
     string = remove_surrounded_chars(string)
-    # string = string.replace('"', '')
+    string = string.replace('"', '')
     string = string.replace('\u201D', '').replace('\u201C', '')  # right and left quote
     string = string.replace('\u201F', '')  # italic looking quote
     string = string.replace('\n', ' ')
