@@ -46,24 +46,15 @@ def generate(text_input, progress=gr.Progress()):
         load_model()
 
     text_input = tts_preprocessor.preprocess(text_input)
+
     prosody = '<prosody rate="{}" pitch="{}">'.format(params['voice_speed'], params['voice_pitch'])
+    silero_input = f'<speak>{prosody}{text_input}</prosody></speak>'
 
-    audio = torch.Tensor()
-    sentences = nltk.sent_tokenize(text_input)
-    progress_steps = 1 / float(len(sentences))
-    cur_progress = 0
-    for sentence in sentences:
+    progress(0, 'Generating Speech')
 
-        silero_input = f'<speak>{prosody}{sentence}</prosody></speak>'
-
-        sentence_audio = model.apply_tts(ssml_text=silero_input,
+    audio = model.apply_tts(ssml_text=silero_input,
                                 speaker=params['speaker'],
                                 sample_rate=params['sample_rate'])
-
-        audio = torch.cat((audio, sentence_audio))
-
-        cur_progress += progress_steps
-        progress(cur_progress, 'Generating Speech')
 
     # Adjust volume
     audio = torch.multiply(audio, float(params['volume'])/100)
